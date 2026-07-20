@@ -1,0 +1,20 @@
+services:
+  vectorai:
+    image: actian/vectorai:latest
+    container_name: vectorai
+
+    ports:
+      - "6573:6573"
+      - "6574:6574"
+      - "6575:6575"
+
+    environment:
+      ACTIAN_VECTORAI_ACCEPT_EULA: "YES"
+
+    volumes:
+      - vectorai_data:/var/lib/actian-vectorai
+
+    restart: unless-stopped
+
+volumes:
+  vectorai_data:
