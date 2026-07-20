@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="IntelGraph - Semantic Cyber Threat Intelligence Search Engine">
+    <title>IntelGraph</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="grid-overlay"></div>
+    <div class="container">
+        <header class="hero">
+            <h1 class="logo">Intel<span class="gradient-text">Graph</span></h1>
+            <p class="tagline">Semantic Cyber Threat Intelligence</p>
+            
+            <div class="stats-section">
+                <div class="stat-box">
+                    <span class="stat-label">MITRE ATT&CK Techniques Indexed</span>
+                    <span class="stat-value">697</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Embedding Model</span>
+                    <span class="stat-value">all-MiniLM-L6-v2</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Vector Database</span>
+                    <span class="stat-value">Actian VectorAI</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="search-section">
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label for="platform-filter">Platform</label>
+                        <select id="platform-filter">
+                            <option value="">All Platforms</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="tactic-filter">Tactic</label>
+                        <select id="tactic-filter">
+                            <option value="">All Tactics</option>
+                        </select>
+                    </div>
+                    <button id="clear-filters-btn" class="clear-btn" title="Clear Filters">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+                    </button>
+                </div>
+
+                <div class="search-bar-wrapper">
+                    <div class="search-input-container">
+                        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="search-input" placeholder="Search cyber threats, techniques, or behaviors..." autocomplete="off">
+                    </div>
+                    <button id="search-button">
+                        <span class="btn-text">Search</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="status-container" class="status-container"></div>
+            
+            <div id="results-container" class="results-container"></div>
+        </main>
+    </div>
+    <script src="/static/app.js" defer></script>
+</body>
+</html>

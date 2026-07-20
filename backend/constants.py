@@ -13,10 +13,12 @@ Documentation references:
         https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
 """
 
+import os
+
 # ---------------------------------------------------------------------------
 # VectorAI DB connection
 # ---------------------------------------------------------------------------
-VECTORAI_HOST: str = "localhost:6574"
+VECTORAI_HOST: str = os.getenv("VECTORAI_HOST", "localhost:6574")
 """gRPC endpoint for the VectorAI DB server (Docker default)."""
 
 # ---------------------------------------------------------------------------

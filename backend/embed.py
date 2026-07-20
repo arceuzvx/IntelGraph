@@ -36,3 +36,17 @@ def embed(text: str) -> List[float]:
         (Step 5 — embed_text helper)
     """
     return _model.encode(text).tolist()
+
+
+def embed_batch(texts: List[str]) -> List[List[float]]:
+    """Convert a batch of text strings to vectors in a single forward pass.
+
+    Significantly faster than calling embed() in a loop.
+
+    Args:
+        texts: List of input texts to embed.
+
+    Returns:
+        A list of embedding vectors.
+    """
+    return _model.encode(texts).tolist()
