@@ -1,11 +1,38 @@
+"""
+IntelGraph — Embedding helper.
+
+Loads the sentence-transformer model exactly once at module-import time
+and exposes a single function for the rest of the codebase.
+
+Documentation references:
+    Model:       https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+    SDK usage:   https://docs.vectoraidb.actian.com/academy/tutorials/first-application
+                 (Step 5 — "Create embedding helpers")
+"""
+
+from typing import List
+
 from sentence_transformers import SentenceTransformer
 
-print("Loading model...")
+from constants import MODEL_NAME
 
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+# ---------------------------------------------------------------------------
+# Singleton model instance — loaded once when this module is first imported.
+# ---------------------------------------------------------------------------
+_model: SentenceTransformer = SentenceTransformer(MODEL_NAME)
 
-print("Loaded!")
 
-embedding = model.encode("browser credential theft")
+def embed(text: str) -> List[float]:
+    """Convert a single text string to a 384-dimensional vector.
 
-print(f"Embedding length: {len(embedding)}")
+    Args:
+        text: The input text to embed.
+
+    Returns:
+        A list of floats representing the embedding vector.
+
+    Documentation reference:
+        https://docs.vectoraidb.actian.com/academy/tutorials/first-application
+        (Step 5 — embed_text helper)
+    """
+    return _model.encode(text).tolist()
