@@ -61,27 +61,16 @@ IntelGraph requires a running instance of Actian VectorAI.
 docker-compose up -d
 ```
 
-### 3. Setup Python Environment
+### 3. Run the Application
+
+Docker Compose starts both VectorAI and the Uvicorn API. The first startup creates the collection and ingests MITRE ATT&CK; later starts reuse persistent named volumes and skip ingestion.
 ```bash
-python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# Linux/Mac
-source .venv/bin/activate
-
-pip install -r requirements.txt
+docker compose up --build -d
 ```
-*(Optional: Copy `.env.example` to `.env` to override `VECTORAI_HOST` if you aren't using the default port).*
 
-### 4. Run the Backend
+Open `http://localhost:8000`. Follow initial ingestion with `docker compose logs -f api`.
 
-The first startup creates the collection and automatically ingests the MITRE ATT&CK dataset. Later starts reuse the persistent Docker volume and skip ingestion.
-
-```bash
-cd backend
-uvicorn api:app --reload
-```
-*The first startup may take a minute while the dataset is downloaded and embedded. To deliberately refresh the dataset later, run `python -m ingest.mitre_attack --refresh`.*
+The VectorAI database, Hugging Face model cache, and downloaded MITRE dataset each use one persistent Docker volume, so containers do not re-download or duplicate them on every start.
 The application and frontend UI will now be available at `http://localhost:8000/`.
 
 ## Screenshots

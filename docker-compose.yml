@@ -16,5 +16,22 @@ services:
 
     restart: unless-stopped
 
+  api:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    environment:
+      VECTORAI_HOST: vectorai:6574
+      HF_HOME: /cache/huggingface
+    volumes:
+      - huggingface_cache:/cache/huggingface
+      - intelgraph_data:/app/data
+    depends_on:
+      - vectorai
+    restart: unless-stopped
+
 volumes:
   vectorai_data:
+  huggingface_cache:
+  intelgraph_data:
