@@ -16,7 +16,6 @@ Usage:
 import argparse
 import json
 import logging
-import sys
 from pathlib import Path
 
 from ingest.downloader import download_attack_dataset
@@ -53,20 +52,17 @@ def _save_filter_metadata(techniques) -> None:
     log.info("Saved filter metadata to %s", FILTERS_PATH)
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Ingest MITRE ATT&CK into IntelGraph")
-    parser.add_argument(
-        "--refresh",
-        action="store_true",
-        help="Force re-download of the ATT&CK dataset",
-    )
-    args = parser.parse_args()
+def ingest_attack_data(*, refresh: bool = False) -> int:
+    """Download (or load) and ingest the MITRE ATT&CK dataset once.
 
+    Returns the number of vectors written. The API invokes this only for an
+    empty collection; the CLI remains available for explicit refreshes.
+    """
     # Step 1: Download / load
     log.info("=" * 60)
     log.info("MITRE ATT&CK Ingestion Pipeline")
     log.info("=" * 60)
-    stix_bundle = download_attack_dataset(refresh=args.refresh)
+    stix_bundle = download_attack_dataset(refresh=refresh)
 
     # Step 2: Parse
     techniques = parse_attack_techniques(stix_bundle)
@@ -74,7 +70,7 @@ def main() -> None:
 
     if not techniques:
         log.error("No techniques found. Aborting.")
-        sys.exit(1)
+        raise RuntimeError("No MITRE ATT&CK techniques found; ingestion aborted.")
 
     # Step 3: Save filter metadata
     _save_filter_metadata(techniques)
@@ -84,6 +80,18 @@ def main() -> None:
     log.info("=" * 60)
     log.info("Ingestion complete. %d techniques inserted.", inserted)
     log.info("=" * 60)
+    return inserted
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Ingest MITRE ATT&CK into IntelGraph")
+    parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help="Force re-download of the ATT&CK dataset",
+    )
+    args = parser.parse_args()
+    ingest_attack_data(refresh=args.refresh)
 
 
 if __name__ == "__main__":

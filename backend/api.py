@@ -19,7 +19,9 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from routes import router as search_router
-from create_collection import ensure_collection
+from create_collection import ensure_collection #created the connection pool ingestion on the disk
+from constants import COLLECTION_NAME #imported the colletion name form the constants
+from ingest.mitre_attack import ingest_attack_data
 from vectorai_connection import VectorAIConnection
 
 
@@ -29,6 +31,11 @@ async def lifespan(app: FastAPI):
     connection = VectorAIConnection()
     client = connection.connect()
     ensure_collection(client)
+    collection_info = client.collections.get_info(COLLECTION_NAME)
+    if collection_info.points_count == 0:
+        # The Docker volume persists inserted points. This runs only for a new
+        # or explicitly emptied database, never on ordinary API restarts.
+        ingest_attack_data()
     app.state.vectorai_client = client
     try:
         yield

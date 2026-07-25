@@ -73,19 +73,15 @@ pip install -r requirements.txt
 ```
 *(Optional: Copy `.env.example` to `.env` to override `VECTORAI_HOST` if you aren't using the default port).*
 
-### 4. Ingest Data
-Populate the persistent VectorAI database with the MITRE ATT&CK dataset.
-```bash
-cd backend
-python -m ingest.mitre_attack
-```
-*The API creates the collection automatically at startup and keeps one VectorAI connection open for its lifetime. The Docker volume retains the collection and vectors across container restarts. The ingestion script will download the dataset and embed all techniques, which may take a minute depending on your hardware.*
+### 4. Run the Backend
 
-### 5. Run the Backend
+The first startup creates the collection and automatically ingests the MITRE ATT&CK dataset. Later starts reuse the persistent Docker volume and skip ingestion.
+
 ```bash
 cd backend
 uvicorn api:app --reload
 ```
+*The first startup may take a minute while the dataset is downloaded and embedded. To deliberately refresh the dataset later, run `python -m ingest.mitre_attack --refresh`.*
 The application and frontend UI will now be available at `http://localhost:8000/`.
 
 ## Screenshots
