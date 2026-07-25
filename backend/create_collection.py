@@ -31,6 +31,17 @@ from actian_vectorai import (
 from constants import COLLECTION_NAME, VECTOR_SIZE, VECTORAI_HOST
 
 
+def ensure_collection(client: VectorAIClient) -> bool:
+    """Ensure the configured collection exists and return whether it was new."""
+    return client.collections.get_or_create(
+        name=COLLECTION_NAME,
+        vectors_config=VectorParams(
+            size=VECTOR_SIZE,
+            distance=Distance.Cosine,
+        ),
+    )
+
+
 def main() -> None:
     """Create the IntelGraph collection or confirm it already exists.
 
@@ -40,13 +51,7 @@ def main() -> None:
     """
     try:
         with VectorAIClient(VECTORAI_HOST) as client:
-            created = client.collections.get_or_create(
-                name=COLLECTION_NAME,
-                vectors_config=VectorParams(
-                    size=VECTOR_SIZE,
-                    distance=Distance.Cosine,
-                ),
-            )
+            created = ensure_collection(client)
 
             if created:
                 print(f"Collection '{COLLECTION_NAME}' created.")

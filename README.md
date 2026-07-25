@@ -73,14 +73,13 @@ pip install -r requirements.txt
 ```
 *(Optional: Copy `.env.example` to `.env` to override `VECTORAI_HOST` if you aren't using the default port).*
 
-### 4. Create Collection & Ingest Data
-Before starting the backend, initialize the database and populate it with the MITRE ATT&CK dataset.
+### 4. Ingest Data
+Populate the persistent VectorAI database with the MITRE ATT&CK dataset.
 ```bash
 cd backend
-python create_collection.py
 python -m ingest.mitre_attack
 ```
-*Note: The ingestion script will download the dataset and embed all techniques. This may take a minute depending on your hardware.*
+*The API creates the collection automatically at startup and keeps one VectorAI connection open for its lifetime. The Docker volume retains the collection and vectors across container restarts. The ingestion script will download the dataset and embed all techniques, which may take a minute depending on your hardware.*
 
 ### 5. Run the Backend
 ```bash

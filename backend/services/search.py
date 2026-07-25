@@ -17,7 +17,7 @@ from actian_vectorai import (
     VectorAIError,
 )
 
-from constants import COLLECTION_NAME, VECTORAI_HOST
+from constants import COLLECTION_NAME
 from embed import embed
 from models import SearchResultItem
 
@@ -56,6 +56,7 @@ def _payload_to_result(point_id: int, score: float, payload: dict) -> SearchResu
 
 def semantic_search(
     query: str,
+    client: VectorAIClient,
     limit: int = 5,
     platform: Optional[str] = None,
     tactic: Optional[str] = None,
@@ -83,16 +84,15 @@ def semantic_search(
             builder = builder.must(VField("tactics").text(tactic))
         search_filter = builder.build()
 
-    with VectorAIClient(VECTORAI_HOST) as client:
-        kwargs = {
-            "vector": query_vector,
-            "limit": limit,
-            "with_payload": True,
-        }
-        if search_filter is not None:
-            kwargs["filter"] = search_filter
+    kwargs = {
+        "vector": query_vector,
+        "limit": limit,
+        "with_payload": True,
+    }
+    if search_filter is not None:
+        kwargs["filter"] = search_filter
 
-        results = client.points.search(COLLECTION_NAME, **kwargs)
+    results = client.points.search(COLLECTION_NAME, **kwargs)
 
     if not results:
         return []
@@ -105,6 +105,7 @@ def semantic_search(
 
 def find_related_techniques(
     point_id: int,
+    client: VectorAIClient,
     limit: int = 5,
 ) -> tuple:
     """Find techniques semantically similar to the given point.
@@ -119,33 +120,32 @@ def find_related_techniques(
     Returns:
         Tuple of (source_title, list_of_SearchResultItem).
     """
-    with VectorAIClient(VECTORAI_HOST) as client:
-        # Retrieve the source point with its vector
-        points = client.points.get(
-            COLLECTION_NAME,
-            ids=[point_id],
-            with_payload=True,
-            with_vectors=True,
-        )
+    # Retrieve the source point with its vector
+    points = client.points.get(
+        COLLECTION_NAME,
+        ids=[point_id],
+        with_payload=True,
+        with_vectors=True,
+    )
 
-        if not points:
-            return ("Unknown", [])
+    if not points:
+        return ("Unknown", [])
 
-        source = points[0]
-        source_payload = source.payload or {}
-        source_title = source_payload.get("title", "Unknown")
-        source_vector = source.vectors
+    source = points[0]
+    source_payload = source.payload or {}
+    source_title = source_payload.get("title", "Unknown")
+    source_vector = source.vectors
 
-        if not source_vector:
-            return (source_title, [])
+    if not source_vector:
+        return (source_title, [])
 
-        # Search for similar vectors, requesting one extra to drop self
-        results = client.points.search(
-            COLLECTION_NAME,
-            vector=source_vector,
-            limit=limit + 1,
-            with_payload=True,
-        )
+    # Search for similar vectors, requesting one extra to drop self
+    results = client.points.search(
+        COLLECTION_NAME,
+        vector=source_vector,
+        limit=limit + 1,
+        with_payload=True,
+    )
 
     # Filter out the source point itself
     related = [
