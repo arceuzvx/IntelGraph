@@ -7,9 +7,10 @@ in batches, using the existing singleton embedding model.
 
 import logging
 import math
+import time
 from typing import List
 
-from actian_vectorai import PointStruct, VectorAIClient
+from actian_vectorai import CollectionNotFoundError, PointStruct, VectorAIClient
 
 from constants import COLLECTION_NAME, VECTORAI_HOST
 from embed import embed_batch
@@ -54,7 +55,10 @@ def _build_embed_text(technique: MitreTechnique) -> str:
     return " ".join(parts)
 
 
-def bulk_insert_techniques(techniques: List[MitreTechnique]) -> int:
+def bulk_insert_techniques(
+    techniques: List[MitreTechnique],
+    client: VectorAIClient | None = None,
+) -> int:
     """Embed and insert techniques into VectorAI in batches.
 
     Args:
@@ -63,39 +67,55 @@ def bulk_insert_techniques(techniques: List[MitreTechnique]) -> int:
     Returns:
         Total number of points inserted.
     """
+    if client is None:
+        with VectorAIClient(VECTORAI_HOST) as new_client:
+            return _bulk_insert_techniques(techniques, new_client)
+    return _bulk_insert_techniques(techniques, client)
+
+
+def _bulk_insert_techniques(techniques: List[MitreTechnique], client: VectorAIClient) -> int:
+    """Insert with an already connected client."""
     total = len(techniques)
     num_batches = math.ceil(total / BATCH_SIZE)
     inserted = 0
 
     log.info("Inserting %d techniques in %d batches (size=%d) ...", total, num_batches, BATCH_SIZE)
 
-    with VectorAIClient(VECTORAI_HOST) as client:
-        for batch_idx in range(num_batches):
-            start = batch_idx * BATCH_SIZE
-            end = min(start + BATCH_SIZE, total)
-            batch = techniques[start:end]
+    for batch_idx in range(num_batches):
+        start = batch_idx * BATCH_SIZE
+        end = min(start + BATCH_SIZE, total)
+        batch = techniques[start:end]
 
-            # Embed all descriptions in a single forward pass
-            texts = [_build_embed_text(t) for t in batch]
-            log.info(
-                "Embedding batch %d/%d (%d texts) ...",
-                batch_idx + 1, num_batches, len(texts),
+        # Embed all descriptions in a single forward pass
+        texts = [_build_embed_text(t) for t in batch]
+        log.info(
+            "Embedding batch %d/%d (%d texts) ...",
+            batch_idx + 1, num_batches, len(texts),
+        )
+        vectors = embed_batch(texts)
+
+        # Build PointStruct objects
+        points = [
+            PointStruct(
+                id=technique.point_id,
+                vector=vector,
+                payload=_build_payload(technique),
             )
-            vectors = embed_batch(texts)
+            for technique, vector in zip(batch, vectors)
+        ]
 
-            # Build PointStruct objects
-            points = [
-                PointStruct(
-                    id=technique.point_id,
-                    vector=vector,
-                    payload=_build_payload(technique),
-                )
-                for technique, vector in zip(batch, vectors)
-            ]
+        # VectorAI may need a brief moment to publish a just-created
+        # collection. Retrying here prevents first-startup races.
+        for attempt in range(5):
+            try:
+                client.points.upsert(COLLECTION_NAME, points)
+                break
+            except CollectionNotFoundError:
+                if attempt == 4:
+                    raise
+                time.sleep(1)
 
-            # Upsert the batch
-            client.points.upsert(COLLECTION_NAME, points)
-            inserted += len(points)
-            log.info("Inserted %d/%d vectors.", inserted, total)
+        inserted += len(points)
+        log.info("Inserted %d/%d vectors.", inserted, total)
 
     return inserted

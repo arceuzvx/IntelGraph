@@ -17,6 +17,9 @@ import argparse
 import json
 import logging
 from pathlib import Path
+from typing import Optional
+
+from actian_vectorai import VectorAIClient
 
 from ingest.downloader import download_attack_dataset
 from ingest.parser import parse_attack_techniques
@@ -52,7 +55,9 @@ def _save_filter_metadata(techniques) -> None:
     log.info("Saved filter metadata to %s", FILTERS_PATH)
 
 
-def ingest_attack_data(*, refresh: bool = False) -> int:
+def ingest_attack_data(
+    *, refresh: bool = False, client: Optional[VectorAIClient] = None
+) -> int:
     """Download (or load) and ingest the MITRE ATT&CK dataset once.
 
     Returns the number of vectors written. The API invokes this only for an
@@ -76,7 +81,7 @@ def ingest_attack_data(*, refresh: bool = False) -> int:
     _save_filter_metadata(techniques)
 
     # Step 4: Bulk embed + insert
-    inserted = bulk_insert_techniques(techniques)
+    inserted = bulk_insert_techniques(techniques, client=client)
     log.info("=" * 60)
     log.info("Ingestion complete. %d techniques inserted.", inserted)
     log.info("=" * 60)
