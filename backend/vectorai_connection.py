@@ -15,8 +15,6 @@ class VectorAIConnection:
         """Open the client once and return the shared connected instance."""
         if self._client is None:
             client = VectorAIClient(VECTORAI_HOST)
-            # The SDK establishes and tears down its gRPC resources through
-            # its context-manager lifecycle.
             self._client = client.__enter__()
         return self._client
 
