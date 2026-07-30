@@ -9,6 +9,6 @@ actian-vectorai-client==1.0.2
 sentence-transformers==5.1.0
 # CPU-only PyTorch — avoids pulling CUDA/NVIDIA/triton deps.
 # Install with: pip install --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.2.2+cpu
+torch==2.13.0
 
 numpy==1.26.4
