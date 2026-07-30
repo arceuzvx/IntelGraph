@@ -141,6 +141,7 @@ select {
     font-size: 0.95rem;
     appearance: none;
     cursor: pointer;
+    -webkit-backdrop-filter: blur(10px); /* Safari 9+, iOS 9+ */
     backdrop-filter: blur(10px);
     transition: all 0.2s ease;
 }
@@ -183,6 +184,7 @@ select option {
     color: var(--text-primary);
     font-family: inherit;
     font-size: 1.1rem;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     transition: all 0.3s ease;
 }
@@ -272,6 +274,7 @@ select option {
     color: #fca5a5;
     padding: 1.5rem;
     border-radius: 8px;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
 }
 
@@ -299,6 +302,7 @@ select option {
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1.5rem;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     transition: all 0.3s ease;
     opacity: 0;
@@ -379,6 +383,7 @@ select option {
     max-height: 4.5rem; /* ~3 lines */
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
 }
 

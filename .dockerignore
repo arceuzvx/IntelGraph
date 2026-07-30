@@ -5,3 +5,10 @@
 __pycache__
 *.py[cod]
 data
+.env
+.env.*
+!.env.example
+.pytest_cache
+tests
+*.md
+.gitignore

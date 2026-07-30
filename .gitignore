@@ -18,6 +18,5 @@ Thumbs.db
 # Logs
 *.log
 
-# Model / Temporary files
-data/*.zip
-data/enterprise-attack-*.json
+# Data (downloaded/generated at runtime)
+data/

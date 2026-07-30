@@ -21,7 +21,10 @@ Documentation references:
         Returns object with .status and .points_count fields.
 """
 
+import time
+
 from actian_vectorai import (
+    CollectionNotFoundError,
     Distance,
     VectorAIClient,
     VectorAIError,
@@ -40,6 +43,25 @@ def ensure_collection(client: VectorAIClient) -> bool:
             distance=Distance.Cosine,
         ),
     )
+
+
+def ensure_collection_ready(
+    client: VectorAIClient,
+    *,
+    retries: int = 10,
+    delay_seconds: float = 1.0,
+) -> bool:
+    """Wait until the collection is visible and ready for writes."""
+    for attempt in range(retries):
+        try:
+            ensure_collection(client)
+            client.collections.get_info(COLLECTION_NAME)
+            return True
+        except CollectionNotFoundError:
+            if attempt == retries - 1:
+                raise
+            time.sleep(delay_seconds)
+    return False
 
 
 def main() -> None:

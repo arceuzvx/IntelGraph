@@ -104,16 +104,24 @@ def _bulk_insert_techniques(techniques: List[MitreTechnique], client: VectorAICl
             for technique, vector in zip(batch, vectors)
         ]
 
-        # VectorAI may need a brief moment to publish a just-created
-        # collection. Retrying here prevents first-startup races.
-        for attempt in range(5):
+        # VectorAI may need time to make a just-created collection writable
+        # even though metadata queries already succeed.  Use exponential
+        # backoff: 2 s → 4 s → 8 s → 15 s (cap), up to 20 attempts.
+        max_retries = 20
+        for attempt in range(max_retries):
             try:
                 client.points.upsert(COLLECTION_NAME, points)
                 break
             except CollectionNotFoundError:
-                if attempt == 4:
+                if attempt == max_retries - 1:
                     raise
-                time.sleep(1)
+                wait = min(2 ** (attempt + 1), 15)
+                log.warning(
+                    "Collection not ready for writes, retrying in %ds "
+                    "(attempt %d/%d)...",
+                    wait, attempt + 1, max_retries,
+                )
+                time.sleep(wait)
 
         inserted += len(points)
         log.info("Inserted %d/%d vectors.", inserted, total)

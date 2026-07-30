@@ -19,7 +19,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from routes import router as search_router
-from create_collection import ensure_collection
+from create_collection import ensure_collection_ready
 from constants import COLLECTION_NAME
 from ingest.mitre_attack import ingest_attack_data
 from vectorai_connection import VectorAIConnection
@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
     """Keep one VectorAI connection open while this API worker is running."""
     connection = VectorAIConnection()
     client = connection.connect()
-    ensure_collection(client)
+    ensure_collection_ready(client)
     collection_info = client.collections.get_info(COLLECTION_NAME)
     if collection_info.points_count == 0:
         # The Docker volume persists inserted points. This runs only for a new
